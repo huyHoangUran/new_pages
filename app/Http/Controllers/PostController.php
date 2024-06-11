@@ -14,22 +14,26 @@ use Illuminate\Support\Facades\Redis;
 
 class PostController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $posts = Post::all();
-        // dd($posts);
         return view('admin.post.list', compact('posts'));
     }
 
-    public function create() { 
+    public function create()
+    { 
         $categories = Category::all();
-        // dd($categories);
-        return view('admin.post.create', [
+        return view(
+            'admin.post.create', [
             'categories' => $categories, 
-        ]);
+            ]
+        );
     }
 
-    public function store(Request $request) {
-        $formFields = $request->validate([
+    public function store(Request $request)
+    {
+        $formFields = $request->validate(
+            [
             'image' => 'mimes:jpg,jpeg,png',
             'user_id' => 'required',
             'category_id' => 'required',
@@ -38,23 +42,10 @@ class PostController extends Controller
             'description' => 'required',
             'status' => 'required',
             'highlight_post' => 'required',
-        ]);
-        // $formFields = [
-        //     'image' => $request->image,
-        //     'user_id' => Auth::user()->id,
-        //     'category_id' => $request->category_id,
-        //     'title' => $request->title,
-        //     'content' => $request->content,
-        //     'description' => $request->description,
-        //     'status' => $request->status,
-        //     'highlight_post' => $request->highlight_post,
-        // ];
-
-        // dd($formFields);
+            ]
+        );
         if($request->hasFile('image')) {
             $file = $request->image;
-            // dd($file->getClientOriginalName());
-            // $fileExtension = $file->getClientOriginalExtension();
             $file->move("uploads/posts/", $file->getClientOriginalName());
         }
         $formFields['image'] = "uploads/posts/".$file->getClientOriginalName();
@@ -63,9 +54,10 @@ class PostController extends Controller
         return redirect()->route('admin.post.list');
     }
 
-    public function user_store(Request $request) {
-        // dd($request);
-        $formFields = $request->validate([
+    public function user_store(Request $request)
+    {
+        $formFields = $request->validate(
+            [
             'image' => 'mimes:jpg,jpeg,png',
             'user_id' => 'required',
             'category_id' => 'required',
@@ -74,14 +66,10 @@ class PostController extends Controller
             'description' => 'required',
             'status' => 'required',
             'highlight_post' => 'required',
-        ]);
-
-        // dd($formFields);
-        // dd($request->image);
+            ]
+        );
         if($request->hasFile('image')) {
             $file = $request->image;
-            // dd($file->getClientOriginalName());
-            // $fileExtension = $file->getClientOriginalExtension();
             $file->move("uploads/posts/", $file->getClientOriginalName());
         }
         $formFields['image'] = "uploads/posts/".$file->getClientOriginalName();
@@ -91,17 +79,22 @@ class PostController extends Controller
         return redirect()->route('client.home')->with('message', 'Create a new post successfully, please wait accepet!');
     }
     
-    public function edit($id) {
+    public function edit($id)
+    {
         $categories = Category::all();
         $posts = Post::find($id);
-        return view('admin.post.edit', [
+        return view(
+            'admin.post.edit', [
             'categories' => $categories,
             'posts' => $posts
-        ]);
+            ]
+        );
     }
 
-    public function update(Request $request) {
-        $formFields = $request->validate([
+    public function update(Request $request)
+    {
+        $formFields = $request->validate(
+            [
             'user_id' => 'required',
             'category_id' => 'required',
             'title' => 'required',
@@ -111,9 +104,9 @@ class PostController extends Controller
             'highlight_post' => 'required',
             'id' => 'required',
             'image' => 'mimes:ipg,jpeg,png',
-        ]);
+            ]
+        );
 
-        // dd($formFields);
         $posts = Post::find($formFields['id']);
 
 
@@ -125,7 +118,6 @@ class PostController extends Controller
             $posts->image = $path . $filename;
         }
         
-        // dd($request->image);
         $posts->title = $formFields['title'];
         $posts->content = $formFields['content'];
         $posts->description = $formFields['description'];
@@ -140,7 +132,8 @@ class PostController extends Controller
         return redirect()->route('admin.post.list');
     }
 
-    public function update_status(Request $request) {
+    public function update_status(Request $request)
+    {
         $posts = Post::find($request->id);
         if($posts) {
             $posts->status = $request->status;
@@ -149,12 +142,14 @@ class PostController extends Controller
         return redirect()->route('admin.post.list');
     }
 
-    public function delete($id) {
+    public function delete($id)
+    {
         Post::where('id', $id)->delete();
         return redirect('admin/post/list')->with('message', 'Delete post successfully');
     }
 
-    public function show_post() {
+    public function show_post()
+    {
         $post_hl = Post::first();
         $posts = Post::where('status', 1)->get();
         $hightlight_posts = Post::where('highlight_post', 1)->get();
@@ -165,7 +160,8 @@ class PostController extends Controller
         return view('client.home', compact('posts', 'post_hl', 'categories', 'hightlight_posts', 'post_sort'));
     }
 
-    public function detail_post($id) {
+    public function detail_post($id)
+    {
         $comments = Comment::where('status', 1)->get();
         $posts = Post::find($id); 
         $posts_same = Post::where('status', 1)->get();
@@ -174,27 +170,30 @@ class PostController extends Controller
         return view('client.detail_post', compact('posts_same', 'posts', 'comments', 'hightlight_posts'));
     }
 
-    public function user_create_post() {
+    public function user_create_post()
+    {
         $categories = Category::all();
         // dd($categories);
-        return view('client.create_post', [
+        return view(
+            'client.create_post', [
             'categories' => $categories, 
-        ]);
+            ]
+        );
     }
 
-    public function post_category($id) {
+    public function post_category($id)
+    {
         // $categories = Category::all();
         $posts = Post::where('category_id', $id)->get();
         $posts_same = Post::all();
         return view('client.post_category', compact('posts', 'posts_same'));
     }
 
-    public function search(Request $request) {
+    public function search(Request $request)
+    {
         $key_words = $request->keyword_submit;
         $posts_same = Post::all();
-
         $search_post = Post::where('title', 'like', '%'.$key_words.'%')->get();
-
         return view('client.search_post', compact('search_post', 'posts_same'));
     }
 

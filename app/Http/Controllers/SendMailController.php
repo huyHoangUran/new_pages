@@ -17,7 +17,7 @@ class SendMailController extends Controller
         $comments = Comment::find($id);
         $mailable = new SendMail($users);
 
-        Mail::to("thanhlongvn2002@gmail.com")->send($mailable);
+        Mail::to("huyhoang12.work@gmail.com")->send($mailable);
         return true;
     }
 }
